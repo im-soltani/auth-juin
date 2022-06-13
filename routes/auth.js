@@ -10,75 +10,91 @@ const {
     LoginRules
 }=require("../middlewares/validator")
 
-router.post("/register",registerRules(),validator,async(req,res)=>{
-    const{name,lastName,email,password}=req.body
-    try{
-let user=await User.findOne({email})
-if(user){
-    return res.send({msg:"user already exist"})
-}
-//create new user
-user=new User({name,lastName,email,password})
-//create Salt and hash
-const salt=10;
-const hashedPassword=await bcrypt.hash(password,salt)
-//replace user passwored with hashed password
-user.password=hashedPassword
 
-//save the user
-await user.save()
+router.post('/register', registerRules(), validator, async (req, res) => {
+  const { name, lastName, email, password } = req.body;
+  try {
+    // Simple Validation
+    /*  if (!name || !lastName || !email || !password) {
+      return res.status(400).json({ msg: 'Please enter all fields!' });
+    } */
 
+    // Check for existing user
+    let user = await User.findOne({ email });
 
-//sign the user
-const payload={
-    id:user._id
-}
-
-const token=await jwt.sign(payload,'sggggghh',{
-    expiresIn:'7 days'
-})
-
-
-res.send({msg:"User registred with success",user,token})
-
+    if (user) {
+      return res.status(400).json({ msg: 'User already exists' });
     }
-    catch (error){
-    res.send({msg:"server error"})
-    }
-})
-//@ Post api/auth/login
+
+    // Create new User
+    user = new User({ name, lastName, email, password });
+
+    // Create Salt & hash
+    const salt = 10;
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Replace user password with hashed password
+    user.password = hashedPassword;
+
+    // Save the user
+    await user.save();
+
+    // sign user
+    const payload = {
+      id: user._id,
+    };
+
+    // Generate token
+    const token = await jwt.sign(payload, process.env.secretOrKey, {
+      expiresIn: '7 days',
+    });
+
+    res.status(200).send({ msg: 'User registred with success', user, token });
+  } catch (error) {
+    res.status(500).send({ msg: 'Server Error' });
+  }
+});
+//@route POST api/auth/login
 //@desc Login User
 //@access Public
-router.post("/login",LoginRules(),validator,async(req,res)=>{
-    const{email,password}=req.body
-    try{
-    let user=await User.findOne({email})  
-    if(!user){
-        return res.send({msg:'Bad credentials ! email'})
+router.post('/login', LoginRules(), validator, async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    //simple Validation
+    /* if (!email || !password) {
+      return res.status(400).send({ msg: 'Please enter all fields' });
+    } */
+
+    // Check for existing user
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).send({ msg: 'Bad Credentials! email' });
     }
 
-    //checkpassword
-    const isMatch=await bcrypt.compare(password,user.password)
-    if(!isMatch){
-        return res.send({msg:'Bad Credentials!password '})
+    //Check password
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).send({ msg: 'Bad Credentials! password' });
     }
-//sign the user
-const payload={
-    id:user._id
-}
-//generate token
 
-const token=await jwt.sign(payload,'sggggghh',{
-    expiresIn:'7 days'
-})
-console.log(token)
+    // sing user
+    const payload = {
+      id: user._id,
+    };
 
-   res.send({msg:"logged with success",user,token}) 
+    // Generate token
+    const token = await jwt.sign(payload, process.env.secretOrKey, {
+      expiresIn: '7 days',
+    });
+
+    res.send({ msg: 'Logged in with success', user, token });
+  } catch (error) {
+    res.status(500).send({ msg: 'Server Error' });
   }
-    catch(error){
-        console.log(error)
-    }
-})
+});
+
 //@route GET api/auth/user
 //@desc get authentified user
 //@access private

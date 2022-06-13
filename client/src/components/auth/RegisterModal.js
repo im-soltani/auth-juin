@@ -1,5 +1,6 @@
 import React,{useState} from 'react'
 import{useDispatch} from "react-redux"
+import {useNavigate} from 'react-router-dom';
 import { NavLink,Modal, ModalHeader, ModalBody, Form, FormGroup, Label, Input, Button} from "reactstrap"
 import {registerUser} from "../../redux/actions/authActions"
 function RegisterModal() {
@@ -12,9 +13,11 @@ function RegisterModal() {
         setModal(!modal)
     }
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const handleRegister=()=>{
         const newUser={name,lastName,email,password}
         dispatch(registerUser(newUser))
+      /* navigate('/dashboard')*/
     }
 
   return (

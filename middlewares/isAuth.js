@@ -1,36 +1,43 @@
 //require jwt 
-const res = require("express/lib/response");
 const jwt= require ("jsonwebtoken")
 
-//require the use Schema
-const User=require('../models/User')
+// Require the user Schema
+const User = require('../models/User');
 
-const isAuth=async(req,res,next)=>{
-    try{
-        const token=req.headers['x-auth-token'];  
+const isAuth = async (req, res, next) => {
+    try {
+        const token = req.headers['x-auth-token'];
     
-    //check for token
-    if(!token)
-        return res.send({msg:'No token,authorization denied '});
+     // Check for token
+     if (!token)
+     return res.status(401).send({ msg: 'No Token, authorization denied' });
 
-    //Verify token
-    const decoded=await jwt.verify(token,'sggggghh')
     
-    
-    const user=await User.findById(decoded.id)
+    // Verify Token
+    const decoded = await jwt.verify(token, process.env.secretOrKey);
 
-    //check for user 
-    if(!user){
-        return res.send({msg:"authorization denied"})
+    // Add User from payload
+    const user = await User.findById(decoded.id);
+
+    //Check for user
+    if (!user) {
+      return res.status(401).send({ msg: 'authorization denied' });
     }
 
-    //create user
-    req.user=user
-  next()
+     // Create user
+     req.user = user;
+
+     
+    
+
+
+  next();
     }
     catch(error){
-        return res.send({msg:"Token is not valid "})
+        return res.status(401).json({ msg: 'Token is not validk' });
     }
     
 }
 module.exports=isAuth
+
+

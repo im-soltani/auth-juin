@@ -1,23 +1,30 @@
-//require express
-const express=require("express")
-//Require connectDB
-const connectDB=require('./config/connectDB')
-//require the router
-const authRouter=require('./routes/auth')
+// Require express
+const express = require('express');
 
-//init express
-const app=express()
+// Require connectDB
+const connectDB = require('./config/connectDB');
 
-//Middleware==Parse the Data  to json
-app.use(express.json())
-//connectDB
-connectDB()
-app.use("/api/auth",authRouter)
-const port=5000
+// Require the router
+const authRouter = require('./routes/auth');
 
-//lunch the server
-app.listen(port,(error)=>
-error?
-console.log(error)
-:console.log(`the server is runnning on port ${port}`)
-)
+// Init express
+const app = express();
+
+// Middleware ==> Parse The Data To json
+app.use(express.json());
+
+// connectDB
+connectDB();
+
+// Use routes
+app.use('/api/auth', authRouter);
+
+// Create port
+const port =  5000;
+
+// Launch the serveer
+app.listen(port, (error) =>
+  error
+    ? console.log(error)
+    : console.log(`The server is running on port ${port}`)
+);

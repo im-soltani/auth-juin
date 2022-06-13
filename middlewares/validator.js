@@ -20,7 +20,7 @@ const LoginRules=()=>[
 const validator=(req,res,next)=>{
     const errors=validationResult(req)
    if(!errors.isEmpty()){
-      return res.send({
+      return res.status(401).send({
           errors:errors.array().map((el)=>({
               msg:el.msg,
           }))
